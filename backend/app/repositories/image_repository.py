@@ -1,0 +1,22 @@
+# 이미지 저장소(placeholder).
+# ⚠️ DB 실제 연결은 금지 범위입니다.
+#
+# TODO:
+# - ImageModel 저장/조회 인터페이스 정의
+
+from __future__ import annotations
+
+from typing import Optional
+
+from app.models.image_model import ImageModel
+
+
+class ImageRepository:
+    """이미지 저장소 인터페이스(placeholder)."""
+
+    def save(self, image: ImageModel) -> None:
+        raise NotImplementedError("TODO: DB 연동 후 구현 예정")
+
+    def get_by_id(self, image_id: str) -> Optional[ImageModel]:
+        raise NotImplementedError("TODO: DB 연동 후 구현 예정")
+
