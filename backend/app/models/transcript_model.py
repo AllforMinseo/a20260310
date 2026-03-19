@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from app.models.base import BaseModel
+from models.base import BaseModel
 
 
 class TranscriptModel(BaseModel):

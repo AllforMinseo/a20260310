@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from app.models.meeting_model import MeetingModel
+from models.meeting_model import MeetingModel
 
 
 class MeetingRepository:

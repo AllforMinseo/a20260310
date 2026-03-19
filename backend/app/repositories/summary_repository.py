@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from app.models.summary_model import SummaryModel
+from models.summary_model import SummaryModel
 
 
 class SummaryRepository:

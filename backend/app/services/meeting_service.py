@@ -13,7 +13,7 @@ from __future__ import annotations
 from typing import Any, Dict
 
 from app.services.summary_service import summarize_meeting_text
-from app.utils.preprocess import stt_json_to_text
+from utils.preprocess import stt_json_to_text
 
 
 def process_meeting_text(stt_raw: Any, ocr_text: str, title: str) -> Dict[str, Any]:

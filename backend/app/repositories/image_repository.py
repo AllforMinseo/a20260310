@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from app.models.image_model import ImageModel
+from models.image_model import ImageModel
 
 
 class ImageRepository:
