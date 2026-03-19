@@ -1,4 +1,4 @@
-# 업로드 서비스(placeholder).
+# 오디오 서비스(placeholder).
 # ⚠️ 파일 저장 구현은 최소 시그니처만. 실제 저장/정책은 storage/에서 확장 예정.
 #
 # TODO:

@@ -13,7 +13,7 @@ from typing import Any, Dict, Sequence
 
 from openai import OpenAI
 
-from app.utils.preprocess import stt_json_to_text
+from utils.preprocess import stt_json_to_text
 
 logger = logging.getLogger(__name__)
 
