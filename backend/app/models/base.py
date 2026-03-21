@@ -10,4 +10,3 @@ class BaseModel:
 
     # TODO: 공통 직렬화/검증 로직 추가(추후)
     pass
-

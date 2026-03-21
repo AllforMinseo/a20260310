@@ -7,7 +7,7 @@
 
 from __future__ import annotations
 
-from typing import Generator, Optional
+from typing import Generator
 
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
@@ -26,7 +26,7 @@ def build_database_url(
     driver: str = "mysql+pymysql",
 ) -> str:
     """
-    데이터베이스 연결 URL 생성
+    데이터베이스 연결 URL을 생성합니다.
 
     Parameters
     ----------
@@ -61,7 +61,7 @@ def build_database_url(
 
 def build_database_url_from_settings(settings: Settings) -> str:
     """
-    Settings 객체로부터 DB URL 생성
+    Settings 객체를 사용해 DB URL을 생성합니다.
 
     Parameters
     ----------
@@ -97,15 +97,15 @@ def create_db_engine(
     echo: bool = False,
 ) -> Engine:
     """
-    SQLAlchemy engine 생성
+    SQLAlchemy engine을 생성합니다.
 
     Parameters
     ----------
     database_url : str
-        DB 연결 URL
+        데이터베이스 연결 URL
 
     pool_pre_ping : bool
-        연결 상태 확인 여부
+        연결 상태 확인 옵션
 
     echo : bool
         SQL 로그 출력 여부
@@ -120,7 +120,7 @@ def create_db_engine(
 
 def create_session_factory(engine: Engine) -> sessionmaker:
     """
-    sessionmaker 생성
+    sessionmaker(SessionLocal)를 생성합니다.
 
     Parameters
     ----------
@@ -137,7 +137,7 @@ def create_session_factory(engine: Engine) -> sessionmaker:
 
 def create_get_db(session_factory: sessionmaker):
     """
-    FastAPI Depends용 get_db 함수 생성
+    FastAPI Depends용 get_db 함수를 생성합니다.
 
     Parameters
     ----------
@@ -153,4 +153,3 @@ def create_get_db(session_factory: sessionmaker):
             db.close()
 
     return get_db
-
