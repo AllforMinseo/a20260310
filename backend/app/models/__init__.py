@@ -1,3 +1,13 @@
-# 도메인 모델 패키지(placeholder).
-# 실제 DB/ORM 연결 없이, 응답/입력 구조를 표현하는 모델을 정의할 예정입니다.
+from models.base import Base
+from models.image_model import Image
+from models.meeting_model import Meeting
+from models.summary_model import Summary
+from models.transcript_model import Transcript
 
+__all__ = [
+    "Base",
+    "Meeting",
+    "Transcript",
+    "Summary",
+    "Image",
+]
