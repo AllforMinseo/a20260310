@@ -9,9 +9,93 @@ from __future__ import annotations
 # - 의미를 새로 해석/요약/재작성하지 않습니다.
 # - 화자 구분/시간 기반 병합/유사도 기반 제거(fuzzy matching)는 하지 않습니다.
 # - 허용: 노이즈 제거, 공백 정리, 완전 동일 반복 축약, 연속 동일 세그먼트 제거, 번호 붙이기, 문장부호 보정
+"""
+오디오 변환 정책
+---------------
+- 입력 파일이 .wav면 그대로 사용
+- .wav가 아니면 ffmpeg를 사용해 .wav로 변환
+- 변환 결과 파일은 원본 파일과 같은 폴더에 저장
+- 파일명 뒤에 "_converted.wav"를 붙여 저장
 
+주의
+----
+- ffmpeg가 시스템에 설치되어 있어야 자동 변환 가능
+- ffmpeg가 없으면 RuntimeError를 발생시킴
+"""
+
+from __future__ import annotations
+
+import json
+import os
 import re
 from typing import Any, Dict, List, Sequence
+
+def preprocess_audio_file(file_path: str) -> str:
+    """
+    오디오 파일 전처리
+
+    현재 버전에서 하는 일
+    -------------------
+    - 파일 존재 여부 확인
+    - 필요 시 추후 확장을 위한 전처리 진입점 유지
+    - 현재는 원본 경로를 그대로 반환
+
+    추후 확장 가능 작업
+    -------------------
+    - mp3, m4a 파일을 wav로 변환
+    - 샘플레이트 통일
+    - 무음 구간 제거
+    - 잡음 제거
+
+    Parameters
+    ----------
+    file_path : str
+        저장된 오디오 파일 경로
+
+    Returns
+    -------
+    str
+        전처리 후 사용할 오디오 파일 경로
+    """
+
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"오디오 파일을 찾을 수 없습니다: {file_path}")
+
+    return file_path
+
+
+def preprocess_image_file(file_path: str) -> str:
+    """
+    이미지 파일 전처리
+
+    현재 버전에서 하는 일
+    -------------------
+    - 파일 존재 여부 확인
+    - 필요 시 추후 확장을 위한 전처리 진입점 유지
+    - 현재는 원본 경로를 그대로 반환
+
+    추후 확장 가능 작업
+    -------------------
+    - 이미지 리사이즈
+    - 회전 보정
+    - 흑백 변환
+    - 대비 향상
+
+    Parameters
+    ----------
+    file_path : str
+        저장된 이미지 파일 경로
+
+    Returns
+    -------
+    str
+        전처리 후 사용할 이미지 파일 경로
+    """
+
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"이미지 파일을 찾을 수 없습니다: {file_path}")
+
+    return file_path
 
 
 def normalize_text(text: str) -> str:
@@ -115,3 +199,49 @@ def stt_json_to_text(segments: Sequence[Any]) -> str:
     if not lines:
         return ""
     return "\n".join(f"{i}. {ln}" for i, ln in enumerate(lines, start=1))
+
+
+def normalize_transcript_text(text: str) -> str:
+    """
+    이미 문자열로 만들어진 transcript를 정리
+
+    역할
+    ----
+    - 앞뒤 공백 제거
+    - 빈 줄 제거
+    - 연속 공백 축소
+
+    사용 예
+    -------
+    - STT 서버가 문자열을 직접 반환했을 때
+    - 저장 전 transcript 정리
+    """
+
+    if not text:
+        return ""
+
+    lines = [line.strip() for line in text.splitlines()]
+    lines = [line for line in lines if line]
+
+    normalized = "\n".join(lines)
+    normalized = re.sub(r"[ \t]+", " ", normalized)
+
+    return normalized.strip()
+
+
+def safe_json_dumps(data: Any) -> str:
+    """
+    dict/list 등의 데이터를 JSON 문자열로 안전하게 변환
+
+    Parameters
+    ----------
+    data : Any
+        JSON 직렬화할 데이터
+
+    Returns
+    -------
+    str
+        JSON 문자열
+    """
+
+    return json.dumps(data, ensure_ascii=False)
