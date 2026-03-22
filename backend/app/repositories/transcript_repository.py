@@ -1,22 +1,95 @@
-# 전사(Transcript) 저장소(placeholder).
-# ⚠️ DB 실제 연결은 금지 범위입니다.
-#
-# TODO:
-# - TranscriptModel 저장/조회 인터페이스 정의
+"""
+transcript_repository.py
+
+Transcript 테이블에 대한 DB 접근 로직을 담당하는 Repository
+
+역할
+- transcript 생성
+- transcript 단건 조회
+- 회의별 transcript 목록 조회
+- 가장 최근 transcript 조회
+- transcript 삭제
+"""
 
 from __future__ import annotations
 
 from typing import Optional
 
-from models.transcript_model import TranscriptModel
+from sqlalchemy.orm import Session
+
+from models.transcript_model import Transcript
+from schemas.transcript_schema import TranscriptCreate
 
 
-class TranscriptRepository:
-    """전사 저장소 인터페이스(placeholder)."""
+def create_transcript(db: Session, transcript_data: TranscriptCreate) -> Transcript:
+    """
+    transcript 생성
+    """
 
-    def save(self, transcript: TranscriptModel) -> None:
-        raise NotImplementedError("TODO: DB 연동 후 구현 예정")
+    transcript = Transcript(
+        meeting_id=transcript_data.meeting_id,
+        content=transcript_data.content,
+    )
 
-    def get_by_id(self, transcript_id: str) -> Optional[TranscriptModel]:
-        raise NotImplementedError("TODO: DB 연동 후 구현 예정")
+    db.add(transcript)
+    db.commit()
+    db.refresh(transcript)
 
+    return transcript
+
+
+def get_transcript_by_id(db: Session, transcript_id: int) -> Optional[Transcript]:
+    """
+    transcript ID로 단건 조회
+    """
+
+    return (
+        db.query(Transcript)
+        .filter(Transcript.id == transcript_id)
+        .first()
+    )
+
+
+def get_transcripts_by_meeting_id(
+    db: Session,
+    meeting_id: int,
+    skip: int = 0,
+    limit: int = 100,
+) -> list[Transcript]:
+    """
+    특정 회의의 transcript 목록 조회
+    """
+
+    return (
+        db.query(Transcript)
+        .filter(Transcript.meeting_id == meeting_id)
+        .order_by(Transcript.created_at.desc())
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+
+
+def get_latest_transcript_by_meeting_id(
+    db: Session,
+    meeting_id: int,
+) -> Optional[Transcript]:
+    """
+    특정 회의의 가장 최근 transcript 조회
+    """
+
+    return (
+        db.query(Transcript)
+        .filter(Transcript.meeting_id == meeting_id)
+        .order_by(Transcript.created_at.desc())
+        .first()
+    )
+
+
+def delete_transcript(db: Session, transcript: Transcript) -> None:
+    """
+    transcript 삭제
+    """
+
+    db.delete(transcript)
+    db.commit()
