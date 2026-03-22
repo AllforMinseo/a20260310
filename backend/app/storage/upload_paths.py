@@ -1,16 +1,48 @@
-# 업로드 경로 규칙(placeholder).
-# TODO:
-# - 업로드 기본 디렉토리, 회의별 디렉토리 구조, 임시 폴더 정책 정의
+"""
+upload_paths.py
+
+업로드 파일 저장 경로를 관리하는 모듈
+
+역할
+- 업로드 기본 디렉토리 경로 생성
+- 오디오 저장 디렉토리 경로 생성
+- 이미지 저장 디렉토리 경로 생성
+- 폴더가 없으면 자동 생성
+
+현재 프로젝트 기준 저장 구조 예시
+-------------------------------
+uploads/
+├─ audio/
+└─ images/
+"""
 
 from __future__ import annotations
 
+import os
 
-def get_upload_root() -> str:
-    """업로드 루트 경로(placeholder)."""
-    return "uploads"
+from config.settings import settings
 
 
-def get_meeting_upload_dir(meeting_id: str) -> str:
-    """회의별 업로드 디렉토리 경로(placeholder)."""
-    return f"uploads/{meeting_id}"
+# -----------------------------------------
+# 기본 업로드 디렉토리
+# -----------------------------------------
+BASE_UPLOAD_DIR = settings.upload_dir
+
+# 오디오 저장 디렉토리
+AUDIO_UPLOAD_DIR = os.path.join(BASE_UPLOAD_DIR, settings.audio_dir)
+
+# 이미지 저장 디렉토리
+IMAGE_UPLOAD_DIR = os.path.join(BASE_UPLOAD_DIR, settings.image_dir)
+
+
+def ensure_upload_dirs() -> None:
+    """
+    업로드 디렉토리가 없으면 생성
+
+    앱 시작 시 또는 파일 저장 직전에 호출할 수 있음
+    """
+
+    os.makedirs(BASE_UPLOAD_DIR, exist_ok=True)
+    os.makedirs(AUDIO_UPLOAD_DIR, exist_ok=True)
+    os.makedirs(IMAGE_UPLOAD_DIR, exist_ok=True)
 
