@@ -1,58 +1,70 @@
 """
-summary_schema.py
+image_schema.py
 
-회의 요약(Summary) 관련 요청/응답 스키마 정의
+이미지(Image) 관련 요청/응답 스키마 정의
 
 역할
-- 요약 생성 요청/응답 형식 정의
-- 회의 요약 조회 API 응답 형식 정의
+- 이미지 업로드 결과 응답 형식 정의
+- OCR 결과 / 분석 결과 응답 형식 정의
+- 일반 이미지와 화이트보드 이미지를 image_type으로 구분
 
-주의
-- 실제 요약 생성은 ai/meeting_summarizer.py에서 수행
-- DB 저장 구조는 models/summary_model.py에서 관리
+image_type 예시
+---------------
+- image
+- whiteboard
 """
 
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class SummaryCreate(BaseModel):
-    """
-    summary 생성 요청 스키마
+ImageType = Literal["image", "whiteboard"]
 
-    실제 서비스에서는 transcript를 바탕으로 자동 생성되는 경우가 많지만,
-    테스트나 수동 생성 시 사용할 수 있음
+
+class ImageCreate(BaseModel):
+    """
+    이미지 생성 요청 스키마
+
+    주로 내부 테스트나 수동 생성에 사용 가능
     """
 
     meeting_id: int = Field(..., gt=0, description="회의 ID")
-    content: str = Field(..., min_length=1, description="회의 요약 텍스트")
+    file_path: str = Field(..., min_length=1, description="저장된 파일 경로")
+    image_type: ImageType = Field(default="image", description="이미지 종류")
+    ocr_text: Optional[str] = Field(default=None, description="OCR 추출 텍스트")
+    analysis_text: Optional[str] = Field(default=None, description="이미지 분석 결과")
 
 
-class SummaryResponse(BaseModel):
+class ImageResponse(BaseModel):
     """
-    summary 응답 스키마
+    이미지 응답 스키마
     """
 
     model_config = ConfigDict(from_attributes=True)
 
     id: int
     meeting_id: int
-    content: str
+    file_path: str
+    image_type: ImageType
+    ocr_text: Optional[str] = None
+    analysis_text: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 
 
-class SummaryGenerateResponse(BaseModel):
+class ImageUploadResponse(BaseModel):
     """
-    요약 생성 API 전용 응답 스키마
+    이미지 업로드 API 응답 스키마
 
-    예:
-    POST /meetings/{meeting_id}/summary
+    업로드 직후 OCR/분석 결과를 함께 반환할 때 사용
     """
 
     meeting_id: int
-    summary: str
+    file_path: str
+    image_type: ImageType
+    ocr_text: Optional[str] = None
+    analysis_text: Optional[str] = None

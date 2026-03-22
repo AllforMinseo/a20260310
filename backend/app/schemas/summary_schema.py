@@ -10,12 +10,14 @@ summary_schema.py
 주의
 - 실제 요약 생성은 ai/meeting_summarizer.py에서 수행
 - DB 저장 구조는 models/summary_model.py에서 관리
+- DB에는 JSON 문자열 형태로 저장
+- API 응답에서는 dict 형태로 구조화하여 반환 가능
 """
 
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -29,14 +31,18 @@ class SummaryCreate(BaseModel):
     """
 
     meeting_id: int = Field(..., gt=0, description="회의 ID")
-    content: str = Field(..., min_length=1, description="회의 요약 텍스트")
+    content: str = Field(..., min_length=1, description="DB 저장용 요약 문자열")
+
 
 
 class SummaryResponse(BaseModel):
     """
-    summary 응답 스키마
-    """
+    summary DB 응답 스키마
 
+    ORM 객체를 그대로 응답해야 할 때 사용
+    content는 JSON 문자열 상태
+    """
+     
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -48,11 +54,24 @@ class SummaryResponse(BaseModel):
 
 class SummaryGenerateResponse(BaseModel):
     """
-    요약 생성 API 전용 응답 스키마
+    요약 생성 API 응답 스키마
 
-    예:
-    POST /meetings/{meeting_id}/summary
+    summary는 구조화된 dict 형태로 반환
     """
 
     meeting_id: int
-    summary: str
+    summary: dict[str, Any]
+
+
+class SummaryDetailResponse(BaseModel):
+    """
+    회의 요약 조회 API 응답 스키마
+
+    DB의 JSON 문자열을 다시 파싱해서 dict로 반환할 때 사용
+    """
+
+    id: int
+    meeting_id: int
+    summary: dict[str, Any]
+    created_at: datetime
+    updated_at: datetime

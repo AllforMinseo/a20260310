@@ -1,20 +1,170 @@
-# 이미지 OCR 모듈(placeholder).
-# ⚠️ OCR 라이브러리/엔진 실제 연결은 금지 범위입니다.
-#
-# TODO:
-# - 이미지 입력(file path/bytes) 받아 OCR 텍스트로 변환하는 시그니처 확정
-# - 엔진 선택(Tesseract, 클라우드 OCR 등) 및 전처리 전략 수립
+"""
+image_ocr.py
+
+이미지 OCR 및 화이트보드 분석 통합 모듈
+
+역할
+- 일반 이미지의 텍스트 추출(OCR)
+- 화이트보드 이미지의 텍스트 추출 + 구조 분석
+- image_type에 따라 처리 로직 분기
+
+지원 image_type
+----------------
+- "image"      : 일반 이미지
+- "whiteboard" : 화이트보드 이미지
+
+반환 형식
+---------
+{
+    "ocr_text": "...",
+    "analysis_text": "..."
+}
+"""
 
 from __future__ import annotations
 
-from typing import Optional
+import base64
+import json
+import mimetypes
+import os
+
+from config.openai_client import get_openai_client
+from config.settings import settings
 
 
-def extract_text_from_image(image_path: Optional[str] = None, image_bytes: Optional[bytes] = None) -> str:
+def _guess_mime_type(file_path: str) -> str:
     """
-    이미지에서 OCR 텍스트를 추출합니다(placeholder).
-
-    TODO: OCR 엔진 연동 후 구현
+    파일 경로로부터 MIME 타입 추정
     """
-    raise NotImplementedError("TODO: OCR 엔진 연동 후 구현 예정")
+
+    mime_type, _ = mimetypes.guess_type(file_path)
+    return mime_type or "image/png"
+
+
+def _encode_image_to_data_url(file_path: str) -> str:
+    """
+    이미지 파일을 data URL(base64) 형태로 변환
+    """
+
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"이미지 파일을 찾을 수 없습니다: {file_path}")
+
+    mime_type = _guess_mime_type(file_path)
+
+    with open(file_path, "rb") as image_file:
+        encoded = base64.b64encode(image_file.read()).decode("utf-8")
+
+    return f"data:{mime_type};base64,{encoded}"
+
+
+def _extract_json_from_response(content: str) -> dict:
+    """
+    모델 응답에서 JSON 파싱 시도
+
+    모델이 순수 JSON으로 응답하면 그대로 파싱하고,
+    파싱이 실패하면 전체 텍스트를 analysis_text로 반환
+    """
+
+    try:
+        return json.loads(content)
+    except json.JSONDecodeError:
+        return {
+            "ocr_text": "",
+            "analysis_text": content.strip(),
+        }
+
+
+def process_image_by_type(image_path: str, image_type: str = "image") -> dict:
+    """
+    이미지 종류에 따라 OCR / 화이트보드 분석 수행
+
+    Parameters
+    ----------
+    image_path : str
+        이미지 파일 경로
+
+    image_type : str
+        이미지 종류
+        - image
+        - whiteboard
+
+    Returns
+    -------
+    dict
+        {
+            "ocr_text": str,
+            "analysis_text": str
+        }
+    """
+
+    if image_type not in {"image", "whiteboard"}:
+        raise ValueError("image_type은 'image' 또는 'whiteboard'만 가능합니다.")
+
+    client = get_openai_client()
+    image_data_url = _encode_image_to_data_url(image_path)
+
+    if image_type == "whiteboard":
+        user_instruction = """
+다음 화이트보드 이미지를 분석하세요.
+
+반드시 JSON 형식으로만 응답하세요.
+형식:
+{
+  "ocr_text": "이미지에서 읽어낸 텍스트",
+  "analysis_text": "화이트보드의 구조, 흐름, 핵심 내용을 정리한 설명"
+}
+
+규칙:
+- ocr_text에는 실제로 보이는 텍스트를 최대한 정확히 적기
+- analysis_text에는 구조, 관계, 흐름, 다이어그램 의미를 설명하기
+- 응답은 JSON만 반환
+""".strip()
+    else:
+        user_instruction = """
+다음 일반 이미지를 분석하세요.
+
+반드시 JSON 형식으로만 응답하세요.
+형식:
+{
+  "ocr_text": "이미지에서 읽어낸 텍스트",
+  "analysis_text": "이미지의 핵심 내용 또는 간단한 설명"
+}
+
+규칙:
+- ocr_text에는 실제로 보이는 텍스트를 최대한 정확히 적기
+- analysis_text에는 이미지의 핵심 내용을 간단히 설명하기
+- 응답은 JSON만 반환
+""".strip()
+
+    response = client.chat.completions.create(
+        model=settings.openai_model,
+        messages=[
+            {
+                "role": "system",
+                "content": "당신은 OCR 및 이미지 분석 도우미입니다. 반드시 JSON 형식으로만 응답하세요.",
+            },
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": user_instruction},
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": image_data_url},
+                    },
+                ],
+            },
+        ],
+        temperature=0.2,
+    )
+
+    content = response.choices[0].message.content
+    if content is None:
+        raise RuntimeError("이미지 OCR/분석 응답이 비어 있습니다.")
+
+    parsed = _extract_json_from_response(content)
+
+    return {
+        "ocr_text": (parsed.get("ocr_text") or "").strip(),
+        "analysis_text": (parsed.get("analysis_text") or "").strip(),
+    }
 

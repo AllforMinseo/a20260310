@@ -23,7 +23,6 @@ from repositories.summary_repository import (
 from repositories.transcript_repository import (
     create_transcript,
     delete_transcript,
-    get_transcript_by_id,
     get_transcripts_by_meeting_id,
 )
 
@@ -37,7 +36,6 @@ __all__ = [
 
     # transcript
     "create_transcript",
-    "get_transcript_by_id",
     "get_transcripts_by_meeting_id",
     "delete_transcript",
 

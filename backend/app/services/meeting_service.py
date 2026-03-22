@@ -11,17 +11,22 @@ meeting_service.py
 - 회의 삭제
 - transcript 기반 summary 생성
 - 회의의 summary 조회
+- 회의의 전체 transcript(전문) 조회
 
 가정
 - 현재 프로젝트에서는 회의당 summary를 1개로 관리
 - summary 재생성 시 기존 summary를 삭제하고 새로 저장
+- summary는 DB에는 JSON 문자열로 저장하고,
+  API 응답에서는 dict 형태로 반환
 """
 
 from __future__ import annotations
 
+import json
+
 from sqlalchemy.orm import Session
 
-from ai.meeting_summarizer import generate_meeting_summary
+from ai.meeting_summarizer import summarize_meeting_from_text
 from repositories.meeting_repository import (
     create_meeting,
     delete_meeting,
@@ -42,8 +47,8 @@ from schemas.meeting_schema import (
 )
 from schemas.summary_schema import (
     SummaryCreate,
+    SummaryDetailResponse,
     SummaryGenerateResponse,
-    SummaryResponse,
 )
 
 
@@ -119,6 +124,45 @@ def remove_meeting(db: Session, meeting_id: int) -> bool:
     return True
 
 
+def get_full_transcript_for_meeting(
+    db: Session,
+    meeting_id: int,
+) -> str | None:
+    """
+    특정 회의의 전체 transcript(전문)를 하나의 문자열로 반환
+
+    동작 방식
+    --------
+    1. 회의 존재 여부 확인
+    2. 해당 회의의 transcript 전체 조회
+    3. 시간 순서대로 transcript 내용을 이어 붙여 하나의 문자열 생성
+
+    Returns
+    -------
+    str | None
+        회의가 없으면 None
+        transcript가 없으면 빈 문자열("")
+    """
+
+    # 1. 회의 존재 확인
+    meeting = get_meeting_by_id(db, meeting_id)
+    if meeting is None:
+        return None
+
+    # 2. transcript 전체 조회
+    transcripts = get_transcripts_by_meeting_id(db, meeting_id)
+
+    if not transcripts:
+        return ""
+
+    # 3. 저장된 transcript를 시간 순서대로 이어 붙임
+    full_text = "\n".join(
+        transcript.content for transcript in reversed(transcripts)
+    )
+
+    return full_text
+
+
 def create_summary_for_meeting(
     db: Session,
     meeting_id: int,
@@ -132,7 +176,9 @@ def create_summary_for_meeting(
     2. 해당 회의의 transcript 전체 조회
     3. transcript 내용을 하나로 합침
     4. 기존 summary가 있으면 삭제
-    5. 새 summary 생성 및 저장
+    5. 구조화된 summary(dict) 생성
+    6. DB 저장용 JSON 문자열로 변환 후 저장
+    7. API 응답은 dict 그대로 반환
 
     Returns
     -------
@@ -150,7 +196,7 @@ def create_summary_for_meeting(
     if not transcripts:
         return None
 
-    # 3. transcript 내용을 하나의 텍스트로 합침
+    # 3. transcript 내용을 시간순으로 하나의 텍스트로 합침
     transcript_text = "\n".join(
         transcript.content for transcript in reversed(transcripts)
     )
@@ -160,28 +206,46 @@ def create_summary_for_meeting(
     if existing_summary is not None:
         delete_summary(db, existing_summary)
 
-    # 5. OpenAI 요약 생성
-    summary_text = generate_meeting_summary(transcript_text)
+    # 5. 구조화된 JSON summary 생성
+    summary_result = summarize_meeting_from_text(
+        stt_text=transcript_text,
+        ocr_text="",
+        title=meeting.title,
+    )
+    # 최소 필드 보정
+    summary_result.setdefault("summary", "")
+    summary_result.setdefault("decisions", [])
+    summary_result.setdefault("action_items", [])
 
-    # 6. 새 summary 저장
+    # 6. DB 저장용 문자열(JSON) 변환
+    summary_content = json.dumps(summary_result, ensure_ascii=False)
+
+    # 7. 새 summary 저장
     summary_data = SummaryCreate(
         meeting_id=meeting_id,
-        content=summary_text,
+        content=summary_content,
     )
     create_summary(db, summary_data)
 
+    # 8. 응답은 dict 그대로 반환
     return SummaryGenerateResponse(
         meeting_id=meeting_id,
-        summary=summary_text,
+        summary=summary_result,
     )
 
 
 def get_summary_for_meeting(
     db: Session,
     meeting_id: int,
-) -> SummaryResponse | None:
+) -> SummaryDetailResponse | None:
     """
     특정 회의의 summary 조회 서비스
+
+    동작 방식
+    --------
+    1. meeting_id로 summary 조회
+    2. DB에 저장된 JSON 문자열(content)을 dict로 파싱
+    3. 프론트엔드가 사용하기 쉬운 구조로 반환
     """
 
     summary = get_summary_by_meeting_id(db, meeting_id)
@@ -189,4 +253,24 @@ def get_summary_for_meeting(
     if summary is None:
         return None
 
-    return SummaryResponse.model_validate(summary)
+    try:
+        parsed_summary = json.loads(summary.content)
+    except json.JSONDecodeError:
+        # 예외 상황에서는 최소 구조로 보정
+        parsed_summary = {
+            "summary": summary.content,
+            "decisions": [],
+            "action_items": [],
+        }
+
+    parsed_summary.setdefault("summary", "")
+    parsed_summary.setdefault("decisions", [])
+    parsed_summary.setdefault("action_items", [])
+
+    return SummaryDetailResponse(
+        id=summary.id,
+        meeting_id=summary.meeting_id,
+        summary=parsed_summary,
+        created_at=summary.created_at,
+        updated_at=summary.updated_at,
+    )
