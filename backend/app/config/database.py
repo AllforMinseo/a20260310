@@ -15,7 +15,6 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from config.settings import Settings
 
-
 def build_database_url(
     *,
     db_user: str,
@@ -153,3 +152,60 @@ def create_get_db(session_factory: sessionmaker):
             db.close()
 
     return get_db
+
+
+# -----------------------------------------
+# Database URL 생성
+# -----------------------------------------
+# 형식:
+# mysql+pymysql://유저:비밀번호@호스트:포트/DB이름
+DATABASE_URL = (
+    f"mysql+pymysql://"
+    f"{Settings.db_user}:"
+    f"{Settings.db_password}@"
+    f"{Settings.db_host}:"
+    f"{Settings.db_port}/"
+    f"{Settings.db_name}"
+)
+
+
+# -----------------------------------------
+# SQLAlchemy Engine 생성
+# -----------------------------------------
+# pool_pre_ping=True:
+# 오래된 연결이 끊어진 경우 자동으로 상태를 점검하고 재연결 시도
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,
+)
+
+
+# -----------------------------------------
+# Session Factory 생성
+# -----------------------------------------
+# autocommit=False:
+# 명시적으로 commit() 해야 반영
+#
+# autoflush=False:
+# 자동 flush 비활성화
+SessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine,
+)
+
+
+def get_db():
+    """
+    FastAPI Dependency용 DB 세션 생성기
+
+    요청마다 DB 세션을 만들고,
+    요청이 끝나면 세션을 닫는다.
+    """
+
+    db = SessionLocal()
+
+    try:
+        yield db
+    finally:
+        db.close()

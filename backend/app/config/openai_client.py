@@ -1,69 +1,49 @@
-# OpenAI 클라이언트 구성(placeholder).
-# ⚠️ 이 파일에서는 실제 비즈니스 로직을 구현하지 않습니다.
-# TODO:
-# - OpenAI 클라이언트 생성/재사용 정책 정의
-# - settings.py와 연결하여 api_key/model 관리
+"""
+openai_client.py
+
+OpenAI 클라이언트 생성 및 재사용 파일
+
+역할
+- settings에서 OpenAI API Key를 읽음
+- 기본 OpenAI 클라이언트를 1회 생성
+- 프로젝트 전체에서 공통으로 재사용
+
+동작 방식
+- api_key를 직접 넘기면 해당 키로 새 클라이언트 생성
+- api_key를 넘기지 않으면 기본 싱글톤 클라이언트 반환
+"""
 
 from __future__ import annotations
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from openai import OpenAI
 
 from config.settings import settings
 
 
 # -----------------------------------------
-# Database URL 생성
+# 기본 OpenAI 클라이언트 생성
 # -----------------------------------------
-# 형식:
-# mysql+pymysql://유저:비밀번호@호스트:포트/DB이름
-DATABASE_URL = (
-    f"mysql+pymysql://"
-    f"{settings.db_user}:"
-    f"{settings.db_password}@"
-    f"{settings.db_host}:"
-    f"{settings.db_port}/"
-    f"{settings.db_name}"
-)
+# 기본 키가 없으면 OpenAI 기능을 쓸 수 없으므로 예외 처리
+if not settings.openai_api_key:
+    raise ValueError("OPENAI_API_KEY가 설정되지 않았습니다.")
+
+_default_client = OpenAI(api_key=settings.openai_api_key)
 
 
-# -----------------------------------------
-# SQLAlchemy Engine 생성
-# -----------------------------------------
-# pool_pre_ping=True:
-# 오래된 연결이 끊어진 경우 자동으로 상태를 점검하고 재연결 시도
-engine = create_engine(
-    DATABASE_URL,
-    pool_pre_ping=True,
-)
-
-
-# -----------------------------------------
-# Session Factory 생성
-# -----------------------------------------
-# autocommit=False:
-# 명시적으로 commit() 해야 반영
-#
-# autoflush=False:
-# 자동 flush 비활성화
-SessionLocal = sessionmaker(
-    autocommit=False,
-    autoflush=False,
-    bind=engine,
-)
-
-
-def get_db():
+def get_openai_client(api_key: str | None = None) -> OpenAI:
     """
-    FastAPI Dependency용 DB 세션 생성기
+    OpenAI 클라이언트를 반환
 
-    요청마다 DB 세션을 만들고,
-    요청이 끝나면 세션을 닫는다.
+    Parameters
+    ----------
+    api_key : str | None
+        별도로 사용할 API Key
+        None이면 기본 싱글톤 클라이언트를 반환
     """
 
-    db = SessionLocal()
+    # 별도 키를 넘기면 새 클라이언트를 생성
+    if api_key:
+        return OpenAI(api_key=api_key)
 
-    try:
-        yield db
-    finally:
-        db.close()
+    # 기본은 전역 싱글톤 사용
+    return _default_client
