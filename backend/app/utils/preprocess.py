@@ -23,8 +23,6 @@ from __future__ import annotations
 - ffmpeg가 없으면 RuntimeError를 발생시킴
 """
 
-from __future__ import annotations
-
 import json
 import os
 import re
