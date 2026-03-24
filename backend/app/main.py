@@ -71,6 +71,6 @@ def health_check() -> dict:
 # -----------------------------------------
 # 라우터 등록
 # -----------------------------------------
-app.include_router(meeting_router.router)
-app.include_router(upload_router.router)
+app.include_router(meeting_router)
+app.include_router(upload_router)
 

@@ -12,16 +12,16 @@ from services import create_new_meeting, process_uploaded_audio
 """
 
 # audio
-from services.audio_service import process_uploaded_audio
+from .audio_service import process_uploaded_audio
 
 # image
-from services.image_service import (
+from .image_service import (
     process_uploaded_image,
     get_meeting_images,
 )
 
 # meeting
-from services.meeting_service import (
+from .meeting_service import (
     create_new_meeting,
     get_meeting_detail,
     get_meeting_list,
@@ -33,7 +33,7 @@ from services.meeting_service import (
 )
 
 # stt
-from services.stt_service import transcribe_audio_file
+from .stt_service import transcribe_audio_file
 
 
 __all__ = [

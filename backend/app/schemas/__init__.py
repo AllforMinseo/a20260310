@@ -9,15 +9,15 @@ schemas 패키지 초기화 파일
 from schemas import MeetingCreate, MeetingResponse
 """
 
-from schemas.image_schema import ImageCreate, ImageResponse, ImageUploadResponse
-from schemas.meeting_schema import MeetingCreate, MeetingResponse, MeetingUpdate
-from schemas.summary_schema import (
+from .image_schema import ImageCreate, ImageResponse, ImageUploadResponse
+from .meeting_schema import MeetingCreate, MeetingResponse, MeetingUpdate
+from .summary_schema import (
     SummaryCreate,
     SummaryDetailResponse,
     SummaryGenerateResponse,
     SummaryResponse,
 )
-from schemas.transcript_schema import (
+from .transcript_schema import (
     TranscriptCreate,
     TranscriptResponse,
     TranscriptSimpleResponse,

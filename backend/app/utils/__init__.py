@@ -1,7 +1,7 @@
 # 유틸리티 패키지.
 # 전처리 등 공통 함수를 제공합니다.
 
-from utils.preprocess import (
+from .preprocess import (
     collapse_internal_repetition,
     deduplicate_consecutive_segments,
     ensure_sentence_punctuation,

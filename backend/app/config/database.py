@@ -13,7 +13,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from config.settings import Settings
+from .settings import Settings, settings
 
 def build_database_url(
     *,
@@ -161,11 +161,11 @@ def create_get_db(session_factory: sessionmaker):
 # mysql+pymysql://유저:비밀번호@호스트:포트/DB이름
 DATABASE_URL = (
     f"mysql+pymysql://"
-    f"{Settings.db_user}:"
-    f"{Settings.db_password}@"
-    f"{Settings.db_host}:"
-    f"{Settings.db_port}/"
-    f"{Settings.db_name}"
+    f"{settings.db_user}:"
+    f"{settings.db_password}@"
+    f"{settings.db_host}:"
+    f"{settings.db_port}/"
+    f"{settings.db_name}"
 )
 
 
