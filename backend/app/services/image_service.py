@@ -27,7 +27,9 @@ image_repository
 from __future__ import annotations
 
 from sqlalchemy.orm import Session
+from fastapi import HTTPException, status
 
+from repositories.meeting_repository import get_meeting_by_id
 from ai.image_ocr import process_image_by_type
 from repositories.image_repository import create_image
 from schemas.image_schema import ImageCreate, ImageResponse, ImageUploadResponse
@@ -65,6 +67,13 @@ def process_uploaded_image(
     ImageUploadResponse
         업로드 후 OCR/분석 결과를 포함한 응답
     """
+     # 0. meeting 존재 확인
+    meeting = get_meeting_by_id(db, meeting_id)
+    if meeting is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="해당 meeting_id의 회의가 없습니다.",
+        )
 
     # 1. 이미지 파일 저장
     saved_path = save_image_file(upload_file)
