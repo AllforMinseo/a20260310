@@ -1,13 +1,76 @@
-# 애플리케이션 진입점(placeholder).
-# ⚠️ FastAPI/Flask 등 특정 서버 프레임워크 구현은 금지되어 있으므로,
-# 여기서는 실행 코드 없이, 추후 연결 지점만 남깁니다.
-#
-# TODO:
-# - 추후 서버 프레임워크가 확정되면 라우터/서비스를 연결하는 엔트리로 사용
-# - 현재는 `app.services.meeting_service.process_meeting_text`를 직접 import 하여 사용
+"""
+main.py
 
-def main() -> None:
-    """향후 실행 진입점(placeholder)."""
-    # TODO: 프레임워크 도입 후 실행 로직 추가
-    return
+애플리케이션 실행 진입점
+
+역할
+- FastAPI 앱 생성
+- 라우터 등록
+- DB 테이블 생성
+- 기본 헬스체크 엔드포인트 제공
+
+실행 예시
+---------
+uvicorn main:app --reload
+"""
+
+from __future__ import annotations
+
+from fastapi import FastAPI
+
+from config.database import engine
+from models import Base
+from routers import meeting_router, upload_router
+
+
+# -----------------------------------------
+# DB 테이블 생성
+# -----------------------------------------
+# 앱 시작 시 SQLAlchemy Base에 등록된 모든 테이블을 생성합니다.
+# 이미 존재하는 테이블은 다시 생성하지 않습니다.
+Base.metadata.create_all(bind=engine)
+
+
+# -----------------------------------------
+# FastAPI 앱 생성
+# -----------------------------------------
+app = FastAPI(
+    title="MOA Meeting Assistant API",
+    description="회의 오디오/이미지 업로드, transcript 저장, summary 생성 API",
+    version="1.0.0",
+)
+
+
+# -----------------------------------------
+# 기본 엔드포인트
+# -----------------------------------------
+@app.get("/", summary="루트 엔드포인트")
+def read_root() -> dict:
+    """
+    기본 루트 엔드포인트
+
+    서버가 실행 중인지 간단히 확인할 때 사용합니다.
+    """
+
+    return {
+        "message": "MOA Meeting Assistant API is running."
+    }
+
+
+@app.get("/health", summary="헬스 체크")
+def health_check() -> dict:
+    """
+    서버 상태 확인용 엔드포인트
+    """
+
+    return {
+        "status": "ok"
+    }
+
+
+# -----------------------------------------
+# 라우터 등록
+# -----------------------------------------
+app.include_router(meeting_router)
+app.include_router(upload_router)
 

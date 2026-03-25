@@ -7,8 +7,205 @@
 
 from __future__ import annotations
 
+from typing import Generator
 
-def init_database() -> None:
-    """DB 초기화(placeholder)."""
-    raise NotImplementedError("TODO: DB 연결은 추후 구현 예정(현재 금지)")
+from sqlalchemy import create_engine
+from sqlalchemy.engine import Engine
+from sqlalchemy.orm import Session, sessionmaker
 
+from .settings import Settings, settings
+
+def build_database_url(
+    *,
+    db_user: str,
+    db_password: str,
+    db_host: str,
+    db_port: int,
+    db_name: str,
+    driver: str = "mysql+pymysql",
+) -> str:
+    """
+    데이터베이스 연결 URL을 생성합니다.
+
+    Parameters
+    ----------
+    db_user : str
+        DB 사용자명
+
+    db_password : str
+        DB 비밀번호
+
+    db_host : str
+        DB 호스트
+
+    db_port : int
+        DB 포트
+
+    db_name : str
+        DB 이름
+
+    driver : str
+        SQLAlchemy 드라이버 문자열
+    """
+
+    return (
+        f"{driver}://"
+        f"{db_user}:"
+        f"{db_password}@"
+        f"{db_host}:"
+        f"{db_port}/"
+        f"{db_name}"
+    )
+
+
+def build_database_url_from_settings(settings: Settings) -> str:
+    """
+    Settings 객체를 사용해 DB URL을 생성합니다.
+
+    Parameters
+    ----------
+    settings : Settings
+        설정 객체
+    """
+
+    if not settings.db_user:
+        raise ValueError("DB_USER 설정이 없습니다.")
+
+    if not settings.db_password:
+        raise ValueError("DB_PASSWORD 설정이 없습니다.")
+
+    if not settings.db_host:
+        raise ValueError("DB_HOST 설정이 없습니다.")
+
+    if not settings.db_name:
+        raise ValueError("DB_NAME 설정이 없습니다.")
+
+    return build_database_url(
+        db_user=settings.db_user,
+        db_password=settings.db_password,
+        db_host=settings.db_host,
+        db_port=settings.db_port,
+        db_name=settings.db_name,
+    )
+
+
+def create_db_engine(
+    database_url: str,
+    *,
+    pool_pre_ping: bool = True,
+    echo: bool = False,
+) -> Engine:
+    """
+    SQLAlchemy engine을 생성합니다.
+
+    Parameters
+    ----------
+    database_url : str
+        데이터베이스 연결 URL
+
+    pool_pre_ping : bool
+        연결 상태 확인 옵션
+
+    echo : bool
+        SQL 로그 출력 여부
+    """
+
+    return create_engine(
+        database_url,
+        pool_pre_ping=pool_pre_ping,
+        echo=echo,
+    )
+
+
+def create_session_factory(engine: Engine) -> sessionmaker:
+    """
+    sessionmaker(SessionLocal)를 생성합니다.
+
+    Parameters
+    ----------
+    engine : Engine
+        SQLAlchemy engine
+    """
+
+    return sessionmaker(
+        autocommit=False,
+        autoflush=False,
+        bind=engine,
+    )
+
+
+def create_get_db(session_factory: sessionmaker):
+    """
+    FastAPI Depends용 get_db 함수를 생성합니다.
+
+    Parameters
+    ----------
+    session_factory : sessionmaker
+        SessionLocal 객체
+    """
+
+    def get_db() -> Generator[Session, None, None]:
+        db = session_factory()
+        try:
+            yield db
+        finally:
+            db.close()
+
+    return get_db
+
+
+# -----------------------------------------
+# Database URL 생성
+# -----------------------------------------
+# 형식:
+# mysql+pymysql://유저:비밀번호@호스트:포트/DB이름
+DATABASE_URL = (
+    f"mysql+pymysql://"
+    f"{settings.db_user}:"
+    f"{settings.db_password}@"
+    f"{settings.db_host}:"
+    f"{settings.db_port}/"
+    f"{settings.db_name}"
+)
+
+
+# -----------------------------------------
+# SQLAlchemy Engine 생성
+# -----------------------------------------
+# pool_pre_ping=True:
+# 오래된 연결이 끊어진 경우 자동으로 상태를 점검하고 재연결 시도
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,
+)
+
+
+# -----------------------------------------
+# Session Factory 생성
+# -----------------------------------------
+# autocommit=False:
+# 명시적으로 commit() 해야 반영
+#
+# autoflush=False:
+# 자동 flush 비활성화
+SessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine,
+)
+
+
+def get_db():
+    """
+    FastAPI Dependency용 DB 세션 생성기
+
+    요청마다 DB 세션을 만들고,
+    요청이 끝나면 세션을 닫는다.
+    """
+
+    db = SessionLocal()
+
+    try:
+        yield db
+    finally:
+        db.close()

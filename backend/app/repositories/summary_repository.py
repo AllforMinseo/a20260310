@@ -1,22 +1,89 @@
-# 요약 결과 저장소(placeholder).
-# ⚠️ DB 실제 연결은 금지 범위입니다.
-#
-# TODO:
-# - SummaryModel 저장/조회 인터페이스 정의
+"""
+summary_repository.py
+
+Summary 테이블에 대한 DB 접근 로직을 담당하는 Repository
+
+역할
+- summary 생성
+- 회의 ID로 summary 조회
+- summary 삭제
+
+가정
+- 현재 프로젝트에서는 회의당 summary를 1개로 관리
+"""
 
 from __future__ import annotations
 
 from typing import Optional
 
-from app.models.summary_model import SummaryModel
+from sqlalchemy.orm import Session
+
+from models.summary_model import Summary
+from schemas.summary_schema import SummaryCreate
 
 
-class SummaryRepository:
-    """요약 저장소 인터페이스(placeholder)."""
+def create_summary(db: Session, summary_data: SummaryCreate) -> Summary:
+    """
+    summary 생성
 
-    def save(self, summary: SummaryModel) -> None:
-        raise NotImplementedError("TODO: DB 연동 후 구현 예정")
+    Parameters
+    ----------
+    db : Session
+        SQLAlchemy DB 세션
 
-    def get_by_id(self, summary_id: str) -> Optional[SummaryModel]:
-        raise NotImplementedError("TODO: DB 연동 후 구현 예정")
+    summary_data : SummaryCreate
+        생성할 summary 데이터
+    """
 
+    summary = Summary(
+        meeting_id=summary_data.meeting_id,
+        content=summary_data.content,
+    )
+
+    db.add(summary)
+    db.commit()
+    db.refresh(summary)
+
+    return summary
+
+
+def get_summary_by_meeting_id(db: Session, meeting_id: int) -> Optional[Summary]:
+    """
+    특정 회의의 summary 조회
+
+    Parameters
+    ----------
+    db : Session
+        SQLAlchemy DB 세션
+
+    meeting_id : int
+        회의 ID
+
+    Returns
+    -------
+    Optional[Summary]
+        summary가 없으면 None 반환
+    """
+
+    return (
+        db.query(Summary)
+        .filter(Summary.meeting_id == meeting_id)
+        .first()
+    )
+
+
+def delete_summary(db: Session, summary: Summary) -> None:
+    """
+    summary 삭제
+
+    Parameters
+    ----------
+    db : Session
+        SQLAlchemy DB 세션
+
+    summary : Summary
+        삭제할 Summary ORM 객체
+    """
+
+    db.delete(summary)
+    db.commit()
