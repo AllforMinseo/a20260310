@@ -11,4 +11,11 @@
     <string name="meeting_title">회의 진행</string>
     <string name="result_title">회의 결과</string>
     <string name="history_title">기록</string>
+
+    <string name="home_header">MOA - AI 회의록</string>
+    <string name="home_add_meeting">+ 회의록 추가</string>
+    <string name="add_next">다음</string>
+    <string name="add_folder_select">폴더 선택</string>
+    <string name="add_meeting_create">회의록 작성</string>
+    <string name="add_method_title">회의록 작성</string>
 </resources>
