@@ -53,4 +53,4 @@ build/
 .vscode/
 .idea/
 
-/backend/app/local_dev.db
+*.db
