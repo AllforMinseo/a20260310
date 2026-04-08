@@ -45,16 +45,16 @@
                 android:padding="12dp">
 
                 <ImageView
-                    android:layout_width="56dp"
-                    android:layout_height="56dp"
-                    android:src="@android:drawable/ic_menu_manage"
-                    android:tint="@color/moa_orange" />
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:src="@drawable/moa_folder"
+                    />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:text="새롭게 파일 생성"
+                    android:text="사용자 지정 폴더"
                     android:textAppearance="?attr/textAppearanceBodyMedium" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -76,10 +76,10 @@
                 android:padding="12dp">
 
                 <ImageView
-                    android:layout_width="56dp"
-                    android:layout_height="56dp"
-                    android:src="@android:drawable/ic_input_add"
-                    android:tint="@color/moa_orange" />
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:src="@drawable/moa_add_folder"
+                    />
 
                 <TextView
                     android:layout_width="wrap_content"

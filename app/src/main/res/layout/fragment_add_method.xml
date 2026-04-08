@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/moa_bg"
@@ -18,27 +19,27 @@
 
     <androidx.gridlayout.widget.GridLayout
         android:id="@+id/grid"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="400dp"
+        android:layout_height="418dp"
         android:layout_marginTop="24dp"
         app:alignmentMode="alignMargins"
         app:columnCount="2"
-        app:rowCount="2"
-        app:useDefaultMargins="true"
-        app:layout_constraintBottom_toTopOf="@id/nextButton"
+
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/title">
+        app:layout_constraintTop_toBottomOf="@id/title"
+        app:rowCount="2"
+        app:useDefaultMargins="true">
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardRecord"
             android:layout_width="0dp"
-            android:layout_height="170dp"
+            android:layout_height="200dp"
             android:layout_margin="6dp"
-            app:layout_columnWeight="1"
-            app:layout_gravity="fill"
             app:cardCornerRadius="18dp"
             app:cardElevation="0dp"
+            app:layout_columnWeight="1"
+            app:layout_gravity="fill"
             app:strokeColor="@color/moa_line"
             app:strokeWidth="1dp">
 
@@ -49,15 +50,14 @@
                 android:orientation="vertical">
 
                 <ImageView
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
-                    android:src="@android:drawable/ic_btn_speak_now"
-                    app:tint="@color/moa_orange" />
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:src="@drawable/moa_microphone" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="15dp"
                     android:text="녹음하기"
                     android:textAppearance="?attr/textAppearanceBodyMedium" />
             </LinearLayout>
@@ -66,12 +66,12 @@
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardUploadAudio"
             android:layout_width="0dp"
-            android:layout_height="170dp"
+            android:layout_height="200dp"
             android:layout_margin="6dp"
-            app:layout_columnWeight="1"
-            app:layout_gravity="fill"
             app:cardCornerRadius="18dp"
             app:cardElevation="0dp"
+            app:layout_columnWeight="1"
+            app:layout_gravity="fill"
             app:strokeColor="@color/moa_line"
             app:strokeWidth="1dp">
 
@@ -82,15 +82,14 @@
                 android:orientation="vertical">
 
                 <ImageView
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
-                    android:src="@android:drawable/ic_input_add"
-                    app:tint="@color/moa_orange" />
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:src="@drawable/moa_add_folder" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="15dp"
                     android:text="녹음 파일 업로드"
                     android:textAppearance="?attr/textAppearanceBodyMedium" />
             </LinearLayout>
@@ -99,12 +98,12 @@
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardCapture"
             android:layout_width="0dp"
-            android:layout_height="170dp"
+            android:layout_height="200dp"
             android:layout_margin="6dp"
-            app:layout_columnWeight="1"
-            app:layout_gravity="fill"
             app:cardCornerRadius="18dp"
             app:cardElevation="0dp"
+            app:layout_columnWeight="1"
+            app:layout_gravity="fill"
             app:strokeColor="@color/moa_line"
             app:strokeWidth="1dp">
 
@@ -115,15 +114,14 @@
                 android:orientation="vertical">
 
                 <ImageView
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
-                    android:src="@android:drawable/ic_menu_camera"
-                    app:tint="@color/moa_orange" />
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:src="@drawable/moa_camera" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="15dp"
                     android:text="촬영하기"
                     android:textAppearance="?attr/textAppearanceBodyMedium" />
             </LinearLayout>
@@ -132,12 +130,12 @@
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardUploadText"
             android:layout_width="0dp"
-            android:layout_height="170dp"
+            android:layout_height="200dp"
             android:layout_margin="6dp"
-            app:layout_columnWeight="1"
-            app:layout_gravity="fill"
             app:cardCornerRadius="18dp"
             app:cardElevation="0dp"
+            app:layout_columnWeight="1"
+            app:layout_gravity="fill"
             app:strokeColor="@color/moa_line"
             app:strokeWidth="1dp">
 
@@ -148,15 +146,15 @@
                 android:orientation="vertical">
 
                 <ImageView
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
-                    android:src="@android:drawable/ic_menu_edit"
-                    app:tint="@color/moa_orange" />
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:src="@drawable/moa_document"
+                    />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="15dp"
                     android:text="텍스트 파일 업로드"
                     android:textAppearance="?attr/textAppearanceBodyMedium" />
             </LinearLayout>

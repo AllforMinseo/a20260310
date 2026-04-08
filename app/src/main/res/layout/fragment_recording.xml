@@ -61,19 +61,20 @@
             android:background="@android:color/transparent"
             android:contentDescription="play"
             android:src="@android:drawable/ic_media_play"
-            android:tint="@android:color/white" />
+            app:tint="@android:color/white" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/recordButton"
-            android:layout_width="86dp"
+            android:layout_width="80dp"
             android:layout_height="86dp"
             android:insetLeft="0dp"
             android:insetRight="0dp"
-            android:text=""
+
             app:cornerRadius="43dp"
             app:strokeColor="@android:color/white"
             app:strokeWidth="3dp"
-            app:backgroundTint="#E45757" />
+            app:backgroundTint="#FF4D4D"
+            app:elevation="8dp" />
 
         <ImageButton
             android:id="@+id/stopButton"
@@ -82,8 +83,8 @@
             android:layout_marginStart="18dp"
             android:background="@android:color/transparent"
             android:contentDescription="stop"
-            android:src="@android:drawable/ic_media_pause"
-            android:tint="@android:color/white" />
+            android:src="@drawable/moa_rectangle"
+            app:tint="@android:color/white" />
     </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
