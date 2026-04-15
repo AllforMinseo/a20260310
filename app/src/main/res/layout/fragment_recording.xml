@@ -55,13 +55,13 @@
 
         <ImageButton
             android:id="@+id/playButton"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:layout_marginEnd="18dp"
-            android:background="@android:color/transparent"
+
             android:contentDescription="play"
-            android:src="@android:drawable/ic_media_play"
-            app:tint="@android:color/white" />
+            android:src="@drawable/moa_play"
+            />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/recordButton"
@@ -78,13 +78,11 @@
 
         <ImageButton
             android:id="@+id/stopButton"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:layout_marginStart="18dp"
-            android:background="@android:color/transparent"
             android:contentDescription="stop"
-            android:src="@drawable/moa_rectangle"
-            app:tint="@android:color/white" />
+            android:src="@drawable/moa_rectangle" />
     </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
