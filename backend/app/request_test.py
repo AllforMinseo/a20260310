@@ -9,9 +9,9 @@ print("STT_SERVER_URL =", url)
 print("Calling stt_client.request_stt(...)")
 
 text = request_stt(
-    file_path="4분 26초.wav",
+    file_path="4분 26초.mp3",
     upload_timeout=60,
-    result_timeout=300,
+    result_timeout=900,
     poll_interval=2.0,
 )
 
