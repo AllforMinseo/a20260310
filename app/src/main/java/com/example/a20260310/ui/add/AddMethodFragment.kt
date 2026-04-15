@@ -6,8 +6,8 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.a20260310.R
-import com.google.android.material.card.MaterialCardView
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.card.MaterialCardView
 
 class AddMethodFragment : Fragment(R.layout.fragment_add_method) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -31,4 +31,3 @@ class AddMethodFragment : Fragment(R.layout.fragment_add_method) {
         }
     }
 }
-

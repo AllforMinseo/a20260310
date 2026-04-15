@@ -16,4 +16,3 @@ class SummaryFragment : Fragment(R.layout.fragment_summary) {
         }
     }
 }
-

@@ -27,4 +27,3 @@ class SplashFragment : Fragment(R.layout.fragment_splash) {
         super.onDestroyView()
     }
 }
-

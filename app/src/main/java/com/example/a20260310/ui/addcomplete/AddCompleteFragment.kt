@@ -16,4 +16,3 @@ class AddCompleteFragment : Fragment(R.layout.fragment_add_complete) {
         }
     }
 }
-

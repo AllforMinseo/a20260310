@@ -7,11 +7,10 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.a20260310.R
 import com.google.android.material.button.MaterialButton
-
 import com.google.android.material.textfield.TextInputEditText
 import java.text.SimpleDateFormat
-import java.util.*
-
+import java.util.Date
+import java.util.Locale
 
 class MeetingCreateFragment : Fragment(R.layout.fragment_meeting_create) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -37,4 +36,3 @@ class MeetingCreateFragment : Fragment(R.layout.fragment_meeting_create) {
         }
     }
 }
-

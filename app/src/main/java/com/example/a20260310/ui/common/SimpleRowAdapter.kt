@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.a20260310.R
+import com.example.a20260310.data.model.SimpleRow
 
 class SimpleRowAdapter(
     private val items: List<SimpleRow>,
@@ -29,4 +30,3 @@ class SimpleRowAdapter(
 
     override fun getItemCount(): Int = items.size
 }
-

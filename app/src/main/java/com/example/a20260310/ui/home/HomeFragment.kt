@@ -7,7 +7,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.a20260310.R
-import com.example.a20260310.ui.common.SimpleRow
+import com.example.a20260310.data.model.SimpleRow
 import com.example.a20260310.ui.common.SimpleRowAdapter
 import com.google.android.material.button.MaterialButton
 
@@ -31,4 +31,3 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
     }
 }
-

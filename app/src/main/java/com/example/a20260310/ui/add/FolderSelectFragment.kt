@@ -18,4 +18,3 @@ class FolderSelectFragment : Fragment(R.layout.fragment_folder_select) {
         }
     }
 }
-

@@ -19,4 +19,3 @@ class ResultFragment : Fragment(R.layout.fragment_result) {
         }
     }
 }
-
