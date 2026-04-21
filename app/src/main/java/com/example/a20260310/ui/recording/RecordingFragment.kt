@@ -3,6 +3,7 @@ package com.example.a20260310.ui.recording
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.TextView
 import androidx.core.app.ActivityCompat
@@ -49,9 +50,15 @@ class RecordingFragment : Fragment(R.layout.fragment_recording) {
                 return@setOnClickListener
             }
 
-            val fileName = getCurrentFileName()
+            val prefs = requireContext().getSharedPreferences("moa_prefs", 0)
+            val meetingName = prefs.getString("current_meeting_name", null)
+            Log.d("MOA_DEBUG", "회의 이름: $meetingName")
 
+            val fileName = getCurrentFileName()
             val file = File(requireContext().filesDir, fileName)
+
+            //파일명 → 회의이름 매핑 저장
+            prefs.edit().putString(fileName, meetingName).apply()
 
             viewModel.toggleRecording(outputPath = file.absolutePath)
         }

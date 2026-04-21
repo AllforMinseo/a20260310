@@ -17,13 +17,17 @@ import java.io.File
 fun getRecordingList(context: Context): List<SimpleRow> {
     val dir = context.filesDir
     val files = dir.listFiles()
+    val prefs = context.getSharedPreferences("moa_prefs", 0)
 
     val list = mutableListOf<SimpleRow>()
 
     files?.filter { it.name.endsWith(".m4a") }?.forEach { file ->
+
+        val meetingName = prefs.getString(file.name, file.name)
+
         list.add(
             SimpleRow(
-                title = file.name,
+                title = meetingName ?: file.name,
                 subtitle = "${file.length() / 1024} KB"
             )
         )
