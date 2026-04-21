@@ -25,6 +25,7 @@ transcript_repository
 
 from __future__ import annotations
 
+import os
 from sqlalchemy.orm import Session
 
 from repositories.transcript_repository import create_transcript
@@ -59,23 +60,36 @@ def process_uploaded_audio(
         저장된 transcript 응답 스키마
     """
 
-    # 1. 오디오 파일 저장
-    saved_path = save_audio_file(upload_file)
+    saved_path: str | None = None
+    processed_path: str | None = None
 
-    # 2. 오디오 전처리
-    processed_path = preprocess_audio_file(saved_path)
+    try:
+        # 1. 오디오 파일 저장
+        saved_path = save_audio_file(upload_file)
 
-    # 3. STT 실행
-    transcript_text = transcribe_audio_file(processed_path)
+        # 2. 오디오 전처리
+        processed_path = preprocess_audio_file(saved_path)
 
-    # 4. transcript 생성 스키마 작성
-    transcript_data = TranscriptCreate(
-        meeting_id=meeting_id,
-        content=transcript_text,
-    )
+        # 3. STT 실행
+        transcript_text = transcribe_audio_file(processed_path)
 
-    # 5. DB 저장
-    transcript = create_transcript(db, transcript_data)
+        # 4. transcript 생성 스키마 작성
+        transcript_data = TranscriptCreate(
+            meeting_id=meeting_id,
+            content=transcript_text,
+        )
 
-    # 6. 응답 스키마 변환
-    return TranscriptResponse.model_validate(transcript)
+        # 5. DB 저장
+        transcript = create_transcript(db, transcript_data)
+
+        # 6. 응답 스키마 변환
+        return TranscriptResponse.model_validate(transcript)
+    finally:
+        # 처리 결과(성공/실패)와 무관하게 업로드 파일 정리
+        for path in {saved_path, processed_path}:
+            if path and os.path.exists(path):
+                try:
+                    os.remove(path)
+                except OSError:
+                    # 정리 실패는 업로드 처리 결과를 바꾸지 않음
+                    pass
