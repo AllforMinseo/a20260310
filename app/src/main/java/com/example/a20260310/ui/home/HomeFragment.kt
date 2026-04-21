@@ -28,7 +28,7 @@ fun getRecordingList(context: Context): List<SimpleRow> {
         list.add(
             SimpleRow(
                 title = meetingName ?: file.name,
-                subtitle = "${file.length() / 1024} KB"
+                subtitle = "file name : "+file.name +"\n"+ "file size : "+"${file.length() / 1024} KB"
             )
         )
     }

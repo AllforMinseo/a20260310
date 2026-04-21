@@ -52,7 +52,7 @@ class RecordingFragment : Fragment(R.layout.fragment_recording) {
 
             val prefs = requireContext().getSharedPreferences("moa_prefs", 0)
             val meetingName = prefs.getString("current_meeting_name", null)
-            Log.d("MOA_DEBUG", "회의 이름: $meetingName")
+            //Log.d("MOA_DEBUG", "회의 이름: $meetingName")
 
             val fileName = getCurrentFileName()
             val file = File(requireContext().filesDir, fileName)
