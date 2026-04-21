@@ -15,7 +15,6 @@ upload_router.py
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
-import requests
 from sqlalchemy.orm import Session
 
 from config.database import get_db
@@ -51,27 +50,11 @@ def upload_audio(
             detail="업로드할 오디오 파일명이 비어 있습니다.",
         )
 
-    try:
-        return process_uploaded_audio(
-            db=db,
-            meeting_id=meeting_id,
-            upload_file=file,
-        )
-    except requests.exceptions.Timeout as exc:
-        raise HTTPException(
-            status_code=status.HTTP_504_GATEWAY_TIMEOUT,
-            detail="STT 서버 응답 시간이 초과되었습니다. 잠시 후 다시 시도해주세요.",
-        ) from exc
-    except requests.exceptions.RequestException as exc:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="STT 서버 연결에 실패했습니다. 서버 주소/상태를 확인해주세요.",
-        ) from exc
-    except RuntimeError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=str(exc),
-        ) from exc
+    return process_uploaded_audio(
+        db=db,
+        meeting_id=meeting_id,
+        upload_file=file,
+    )
 
 
 @router.post(

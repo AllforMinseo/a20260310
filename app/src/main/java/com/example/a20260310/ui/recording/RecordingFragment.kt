@@ -3,6 +3,7 @@ package com.example.a20260310.ui.recording
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.TextView
 import androidx.core.app.ActivityCompat
@@ -13,7 +14,16 @@ import com.example.a20260310.R
 import com.example.a20260310.viewmodel.RecordingViewModel
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
+fun getCurrentFileName(): String {
+    val sdf = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
+    val currentTime = sdf.format(Date())
+    return "moa_$currentTime.m4a"
+}
 class RecordingFragment : Fragment(R.layout.fragment_recording) {
     private val viewModel: RecordingViewModel by viewModels()
 
@@ -39,7 +49,18 @@ class RecordingFragment : Fragment(R.layout.fragment_recording) {
                 ensureAudioPermission()
                 return@setOnClickListener
             }
-            viewModel.toggleRecording(outputPath = "/sdcard/Download/recording.m4a")
+
+            val prefs = requireContext().getSharedPreferences("moa_prefs", 0)
+            val meetingName = prefs.getString("current_meeting_name", null)
+            Log.d("MOA_DEBUG", "회의 이름: $meetingName")
+
+            val fileName = getCurrentFileName()
+            val file = File(requireContext().filesDir, fileName)
+
+            //파일명 → 회의이름 매핑 저장
+            prefs.edit().putString(fileName, meetingName).apply()
+
+            viewModel.toggleRecording(outputPath = file.absolutePath)
         }
 
         doneFab.setOnClickListener {
