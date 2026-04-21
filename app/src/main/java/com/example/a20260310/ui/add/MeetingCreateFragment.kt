@@ -23,10 +23,7 @@ class MeetingCreateFragment : Fragment(R.layout.fragment_meeting_create) {
         val currentDate = SimpleDateFormat("yyyy.MM.dd", Locale.getDefault()).format(Date())
         val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
 
-        //nameInput.setText(currentDate)
-        if (nameInput.text.isNullOrEmpty()) {
-            nameInput.setText(currentDate)
-        }
+        nameInput.setText(currentDate)
         dateInput.setText(currentDate)
         timeInput.setText(currentTime)
 
@@ -35,20 +32,7 @@ class MeetingCreateFragment : Fragment(R.layout.fragment_meeting_create) {
         }
 
         view.findViewById<MaterialButton>(R.id.nextButton).setOnClickListener {
-
-            val meetingName = nameInput.text.toString()
-
-            val prefs = requireContext().getSharedPreferences("moa_prefs", 0)
-            prefs.edit().putString("current_meeting_name", meetingName).apply()
-
             findNavController().navigate(R.id.action_meetingCreateFragment_to_addMethodFragment)
         }
-
-        val prefs = requireContext().getSharedPreferences("moa_prefs", 0)
-
-        val meetingName = nameInput.text.toString()
-
-        // 파일명은 나중에 Recording에서 생성되니까 임시로 저장
-        prefs.edit().putString("current_meeting_name", meetingName).apply()
     }
 }
