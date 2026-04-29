@@ -11,8 +11,7 @@ import com.example.a20260310.R
 import com.example.a20260310.data.model.SimpleRow
 import com.example.a20260310.ui.common.SimpleRowAdapter
 import com.google.android.material.button.MaterialButton
-import java.text.SimpleDateFormat
-import java.util.*
+
 import java.io.File
 
 fun getRecordingList(context: Context): List<SimpleRow> {
@@ -22,14 +21,9 @@ fun getRecordingList(context: Context): List<SimpleRow> {
 
     val list = mutableListOf<SimpleRow>()
 
-    val sdf = SimpleDateFormat("yyyy년 M월 d일         a HH:mm", Locale.KOREA)
-
     files?.filter { it.name.endsWith(".m4a") }?.forEach { file ->
 
         val meetingName = prefs.getString(file.name, file.name)
-
-        val date = Date(file.lastModified())
-        val formattedDate = sdf.format(date)
 
         list.add(
             SimpleRow(
@@ -39,18 +33,7 @@ fun getRecordingList(context: Context): List<SimpleRow> {
         )
     }
 
-    return files
-        ?.filter { it.name.endsWith(".m4a") }
-        ?.sortedByDescending { it.lastModified() }
-        ?.map { file ->
-            val meetingName = prefs.getString(file.name, file.name)
-            val formattedDate = sdf.format(Date(file.lastModified()))
-
-            SimpleRow(
-                title = meetingName ?: file.name,
-                subtitle = formattedDate
-            )
-        } ?: emptyList()
+    return list.sortedByDescending { it.title }
 }
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
