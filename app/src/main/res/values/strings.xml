@@ -4,12 +4,13 @@
 
     <string name="nav_home">Home</string>
     <string name="nav_meeting">Meeting</string>
-    <string name="nav_result">Result</string>
     <string name="nav_history">History</string>
+    <string name="nav_meeting_upload">회의록 작성</string>
+    <string name="nav_meeting_summary">회의 요약</string>
+    <string name="nav_recording">녹음</string>
 
     <string name="home_title">MOA 홈</string>
     <string name="meeting_title">회의 진행</string>
-    <string name="result_title">회의 결과</string>
     <string name="history_title">기록</string>
 
     <string name="home_header">MOA - AI 회의록</string>
@@ -17,5 +18,15 @@
     <string name="add_next">다음</string>
     <string name="add_folder_select">폴더 선택</string>
     <string name="add_meeting_create">회의록 작성</string>
-    <string name="add_method_title">회의록 작성</string>
+    <string name="add_method_title">회의 자료 업로드</string>
+    <string name="add_document_upload">문서 파일 업로드</string>
+    <string name="add_document_mime_rejected">형식은 PDF, PNG, JPEG, WEBP만 가능합니다.</string>
+    <string name="add_document_added">선택한 문서: %1$s</string>
+    <string name="add_summarize">요약하기</string>
+    <string name="summary_done">완료</string>
+    <string name="recording_summarize">요약하기</string>
+    <string name="recording_done">녹음 완료</string>
+    <string name="summarizing_title">요약 중</string>
+    <string name="summarizing_message">회의 내용을 분석하고 있습니다…</string>
+    <string name="summarizing_error_generic">요약 처리 중 오류가 발생했습니다.</string>
 </resources>

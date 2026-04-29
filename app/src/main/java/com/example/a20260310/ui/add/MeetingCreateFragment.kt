@@ -4,8 +4,11 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.a20260310.R
+import com.example.a20260310.data.model.MeetingDraft
+import com.example.a20260310.viewmodel.MeetingSessionViewModel
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import java.text.SimpleDateFormat
@@ -13,6 +16,8 @@ import java.util.Date
 import java.util.Locale
 
 class MeetingCreateFragment : Fragment(R.layout.fragment_meeting_create) {
+    private val sessionViewModel: MeetingSessionViewModel by activityViewModels()
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -32,6 +37,14 @@ class MeetingCreateFragment : Fragment(R.layout.fragment_meeting_create) {
         }
 
         view.findViewById<MaterialButton>(R.id.nextButton).setOnClickListener {
+            sessionViewModel.clearMinutes()
+            sessionViewModel.setDraft(
+                MeetingDraft(
+                    title = nameInput.text?.toString().orEmpty(),
+                    date = dateInput.text?.toString().orEmpty(),
+                    time = timeInput.text?.toString().orEmpty(),
+                ),
+            )
             findNavController().navigate(R.id.action_meetingCreateFragment_to_addMethodFragment)
         }
     }

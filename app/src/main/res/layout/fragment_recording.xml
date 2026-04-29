@@ -3,98 +3,105 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#6B452B"
-    android:padding="16dp">
+    android:background="#694629">
 
     <TextView
         android:id="@+id/title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="24dp"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center"
         android:text="2026.03.18 주간 회의"
-        android:textColor="@android:color/white"
-        android:textSize="18sp"
+        android:textColor="#F6F6F6"
+        android:textSize="32sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <View
+    <FrameLayout
         android:id="@+id/wave"
         android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="18dp"
-        android:background="#4E3120"
-        app:layout_constraintBottom_toTopOf="@id/timer"
+        android:layout_height="291dp"
+        android:layout_marginTop="50dp"
+        android:background="#4B2F1C"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/title" />
+        app:layout_constraintTop_toBottomOf="@id/title">
+
+        <com.example.a20260310.ui.recording.RecordingWaveformView
+            android:id="@+id/waveformView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </FrameLayout>
 
     <TextView
         android:id="@+id/timer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="22dp"
+        android:layout_marginTop="54dp"
+        android:fontFamily="sans-serif-medium"
         android:text="00:08:25"
-        android:textColor="@android:color/white"
-        android:textSize="34sp"
+        android:textColor="#F6F6F6"
+        android:textSize="52sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@id/controls"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/wave" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/summarizeButton"
+        android:layout_width="0dp"
+        android:layout_height="52dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="24dp"
+        android:text="@string/recording_done"
+        android:textColor="@android:color/white"
+        app:backgroundTint="@color/moa_orange"
+        app:cornerRadius="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/controls"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="54dp"
+        android:layout_marginBottom="36dp"
+        app:layout_constraintBottom_toTopOf="@id/summarizeButton"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <ImageButton
-            android:id="@+id/playButton"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_marginEnd="18dp"
-
-            android:contentDescription="play"
-            android:src="@drawable/moa_play"
-            />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/timer">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/recordButton"
-            android:layout_width="80dp"
-            android:layout_height="86dp"
+            android:layout_width="98dp"
+            android:layout_height="98dp"
             android:insetLeft="0dp"
             android:insetRight="0dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:text=""
+            android:textColor="#00FFFFFF"
+            app:backgroundTint="#EF5A5A"
+            app:cornerRadius="49dp"
+            app:elevation="0dp"
+            app:icon="@drawable/moa_play"
+            app:iconGravity="textTop"
+            app:iconPadding="0dp"
+            app:iconSize="40dp"
+            app:rippleColor="#22FFFFFF"
+            app:strokeColor="#F6F6F6"
+            app:strokeWidth="6dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            app:cornerRadius="43dp"
-            app:strokeColor="@android:color/white"
-            app:strokeWidth="3dp"
-            app:backgroundTint="#FF4D4D"
-            app:elevation="8dp" />
-
-        <ImageButton
-            android:id="@+id/stopButton"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_marginStart="18dp"
-            android:contentDescription="stop"
-            android:src="@drawable/moa_rectangle" />
-    </LinearLayout>
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/doneFab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription="done"
-        app:backgroundTint="@color/moa_orange"
-        app:srcCompat="@android:drawable/ic_media_next"
-        app:tint="@android:color/white"
-        app:layout_constraintBottom_toTopOf="@id/controls"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="16dp" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

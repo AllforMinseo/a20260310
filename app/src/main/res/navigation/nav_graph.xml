@@ -27,7 +27,7 @@
     <fragment
         android:id="@+id/folderSelectFragment"
         android:name="com.example.a20260310.ui.add.FolderSelectFragment"
-        android:label="Add">
+        android:label="@string/nav_meeting_upload">
         <action
             android:id="@+id/action_folderSelectFragment_to_meetingCreateFragment"
             app:destination="@id/meetingCreateFragment" />
@@ -36,7 +36,7 @@
     <fragment
         android:id="@+id/meetingCreateFragment"
         android:name="com.example.a20260310.ui.add.MeetingCreateFragment"
-        android:label="Add">
+        android:label="@string/nav_meeting_upload">
         <action
             android:id="@+id/action_meetingCreateFragment_to_addMethodFragment"
             app:destination="@id/addMethodFragment" />
@@ -45,25 +45,39 @@
     <fragment
         android:id="@+id/addMethodFragment"
         android:name="com.example.a20260310.ui.add.AddMethodFragment"
-        android:label="Add">
+        android:label="@string/nav_meeting_upload">
         <action
             android:id="@+id/action_addMethodFragment_to_recordingFragment"
             app:destination="@id/recordingFragment" />
+        <action
+            android:id="@+id/action_addMethodFragment_to_summarizingFragment"
+            app:destination="@id/summarizingFragment" />
     </fragment>
 
     <fragment
         android:id="@+id/recordingFragment"
         android:name="com.example.a20260310.ui.recording.RecordingFragment"
-        android:label="Recording">
+        android:label="@string/nav_recording">
         <action
-            android:id="@+id/action_recordingFragment_to_summaryFragment"
-            app:destination="@id/summaryFragment" />
+            android:id="@+id/action_recordingFragment_to_summarizingFragment"
+            app:destination="@id/summarizingFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/summarizingFragment"
+        android:name="com.example.a20260310.ui.summary.SummarizingFragment"
+        android:label="@string/summarizing_title">
+        <action
+            android:id="@+id/action_summarizingFragment_to_summaryFragment"
+            app:destination="@id/summaryFragment"
+            app:popUpTo="@id/summarizingFragment"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment
         android:id="@+id/summaryFragment"
         android:name="com.example.a20260310.ui.summary.SummaryFragment"
-        android:label="Summary">
+        android:label="@string/nav_meeting_summary">
         <action
             android:id="@+id/action_summaryFragment_to_addCompleteFragment"
             app:destination="@id/addCompleteFragment" />
@@ -72,12 +86,7 @@
     <fragment
         android:id="@+id/addCompleteFragment"
         android:name="com.example.a20260310.ui.addcomplete.AddCompleteFragment"
-        android:label="Add" />
-
-    <fragment
-        android:id="@+id/resultFragment"
-        android:name="com.example.a20260310.ui.result.ResultFragment"
-        android:label="@string/nav_result" />
+        android:label="@string/nav_meeting_upload" />
 
     <fragment
         android:id="@+id/historyFragment"

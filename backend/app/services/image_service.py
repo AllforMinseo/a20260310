@@ -34,6 +34,7 @@ from ai.image_ocr import process_image_by_type
 from repositories.image_repository import create_image
 from schemas.image_schema import ImageCreate, ImageResponse, ImageUploadResponse
 from storage.file_manager import save_image_file
+from utils.pdf_extract import extract_pdf_plain_text
 from utils.preprocess import preprocess_image_file
 
 
@@ -67,7 +68,7 @@ def process_uploaded_image(
     ImageUploadResponse
         업로드 후 OCR/분석 결과를 포함한 응답
     """
-     # 0. meeting 존재 확인
+    # 0. meeting 존재 확인
     meeting = get_meeting_by_id(db, meeting_id)
     if meeting is None:
         raise HTTPException(
@@ -75,17 +76,33 @@ def process_uploaded_image(
             detail="해당 meeting_id의 회의가 없습니다.",
         )
 
-    # 1. 이미지 파일 저장
+    # 1. 이미지(또는 PDF 등) 파일 저장
     saved_path = save_image_file(upload_file)
 
-    # 2. 이미지 전처리
-    processed_path = preprocess_image_file(saved_path)
-
-    # 3. 이미지 종류에 따라 OCR / 분석 수행
-    image_result = process_image_by_type(
-        image_path=processed_path,
-        image_type=image_type,
-    )
+    # 2. PDF는 텍스트 레이어만 추출(스캔 PDF는 비어 있을 수 있음). 그 외(이미지)는 비전 OCR.
+    lower = saved_path.lower()
+    if lower.endswith(".pdf"):
+        try:
+            pdf_text = extract_pdf_plain_text(saved_path).strip()
+        except Exception:
+            pdf_text = ""
+        if not pdf_text:
+            image_result = {
+                "ocr_text": "",
+                "analysis_text": (
+                    "이 PDF에서 추출할 텍스트가 없습니다. "
+                    "스캔 PDF는 '촬영하기'로 페이지를 이미지로 올리거나, 텍스트가 포함된 PDF를 사용해 주세요."
+                ),
+            }
+        else:
+            image_result = {"ocr_text": pdf_text, "analysis_text": ""}
+        processed_path = saved_path
+    else:
+        processed_path = preprocess_image_file(saved_path)
+        image_result = process_image_by_type(
+            image_path=processed_path,
+            image_type=image_type,
+        )
 
     # 4. DB 저장용 스키마 생성
     image_data = ImageCreate(

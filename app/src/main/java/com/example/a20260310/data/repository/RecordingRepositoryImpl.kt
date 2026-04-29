@@ -28,4 +28,12 @@ class RecordingRepositoryImpl : RecordingRepository {
             mediaRecorder = null
         }
     }
+
+    override fun getMaxAmplitude(): Int {
+        return try {
+            mediaRecorder?.maxAmplitude ?: 0
+        } catch (_: Exception) {
+            0
+        }
+    }
 }

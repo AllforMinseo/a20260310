@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
 
         drawerLayout = findViewById(R.id.drawer_layout)
         appBarConfiguration = AppBarConfiguration(
-            setOf(R.id.homeFragment, R.id.historyFragment, R.id.resultFragment),
+            setOf(R.id.homeFragment, R.id.historyFragment),
             drawerLayout,
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() {
         navView.setupWithNavController(navController)
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            val fullScreen = setOf(R.id.splashFragment, R.id.recordingFragment)
+            val fullScreen = setOf(R.id.splashFragment)
             val showChrome = destination.id !in fullScreen
 
             toolbar.visibility = if (showChrome) android.view.View.VISIBLE else android.view.View.GONE

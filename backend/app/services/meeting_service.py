@@ -39,6 +39,7 @@ from repositories.summary_repository import (
     delete_summary,
     get_summary_by_meeting_id,
 )
+from repositories.image_repository import get_images_by_meeting_id
 from repositories.transcript_repository import get_transcripts_by_meeting_id
 from schemas.meeting_schema import (
     MeetingCreate,
@@ -193,23 +194,33 @@ def create_summary_for_meeting(
 
     # 2. transcript 전체 조회
     transcripts = get_transcripts_by_meeting_id(db, meeting_id)
-    if not transcripts:
-        return None
-
-    # 3. transcript 내용을 시간순으로 하나의 텍스트로 합침
     transcript_text = "\n".join(
         transcript.content for transcript in reversed(transcripts)
-    )
+    ) if transcripts else ""
 
-    # 4. 기존 summary가 있으면 삭제
+    # 3. 이미지 OCR/분석 텍스트 수집
+    images = get_images_by_meeting_id(db, meeting_id, skip=0, limit=1000)
+    ocr_chunks: list[str] = []
+    for image in reversed(images):
+        if image.ocr_text and image.ocr_text.strip():
+            ocr_chunks.append(image.ocr_text.strip())
+        if image.analysis_text and image.analysis_text.strip():
+            ocr_chunks.append(image.analysis_text.strip())
+    ocr_text = "\n".join(ocr_chunks)
+
+    # 4. STT/OCR 둘 다 비어 있으면 요약할 근거가 없음
+    if not transcript_text.strip() and not ocr_text.strip():
+        return None
+
+    # 5. 기존 summary가 있으면 삭제
     existing_summary = get_summary_by_meeting_id(db, meeting_id)
     if existing_summary is not None:
         delete_summary(db, existing_summary)
 
-    # 5. 구조화된 JSON summary 생성
+    # 6. 구조화된 JSON summary 생성
     summary_result = summarize_meeting_from_text(
         stt_text=transcript_text,
-        ocr_text="",
+        ocr_text=ocr_text,
         title=meeting.title,
     )
     # 최소 필드 보정
@@ -217,17 +228,17 @@ def create_summary_for_meeting(
     summary_result.setdefault("decisions", [])
     summary_result.setdefault("action_items", [])
 
-    # 6. DB 저장용 문자열(JSON) 변환
+    # 7. DB 저장용 문자열(JSON) 변환
     summary_content = json.dumps(summary_result, ensure_ascii=False)
 
-    # 7. 새 summary 저장
+    # 8. 새 summary 저장
     summary_data = SummaryCreate(
         meeting_id=meeting_id,
         content=summary_content,
     )
     create_summary(db, summary_data)
 
-    # 8. 응답은 dict 그대로 반환
+    # 9. 응답은 dict 그대로 반환
     return SummaryGenerateResponse(
         meeting_id=meeting_id,
         summary=summary_result,
