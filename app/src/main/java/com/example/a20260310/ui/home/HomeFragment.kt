@@ -15,21 +15,23 @@ import com.google.android.material.button.MaterialButton
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.core.content.ContextCompat
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
     private lateinit var recycler: RecyclerView
-    private var selectedFolder = "전체"
+    private lateinit var folderTabs: LinearLayout
+    private var selectedFolder: String = "전체"
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         recycler = view.findViewById(R.id.recycler)
+        folderTabs = view.findViewById(R.id.folderTabs)
 
         recycler.layoutManager = LinearLayoutManager(context)
 
-        setupFolderTabs(view)
-
+        setupFolderTabs()
         loadList()
 
         view.findViewById<MaterialButton>(R.id.addMeetingButton).setOnClickListener {
@@ -37,30 +39,54 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
     }
 
-    private fun setupFolderTabs(view: View) {
-        val container = view.findViewById<LinearLayout>(R.id.folderTabs)
-        container.removeAllViews()
+    private fun setupFolderTabs() {
+        folderTabs.removeAllViews()
 
-        val folders = loadFolders(requireContext())
+        val folders = mutableListOf("전체")
+        folders.addAll(getFolderNames(requireContext()))
 
         folders.forEach { name ->
-            val btn = MaterialButton(requireContext()).apply {
-                text = name
-                setOnClickListener {
-                    selectedFolder = name
-                    loadList()
-                }
-            }
-            container.addView(btn)
+            val btn = createFolderButton(name)
+            folderTabs.addView(btn)
         }
+
+        updateTabs()
     }
 
+    private fun createFolderButton(name: String): MaterialButton {
+        val btn = MaterialButton(requireContext())
 
-    private fun loadFolders(context: Context): List<String> {
-        val prefs = context.getSharedPreferences("moa_prefs", 0)
-        val folders = prefs.getStringSet("folder_list", setOf()) ?: setOf()
+        btn.text = name
 
-        return listOf("전체") + folders
+        btn.setPadding(40, 16, 40, 16)
+
+        btn.strokeWidth = 2
+        btn.strokeColor = ContextCompat.getColorStateList(requireContext(), R.color.moa_line)
+
+        btn.setBackgroundColor(resources.getColor(R.color.moa_bg, null))
+        btn.setTextColor(resources.getColor(R.color.moa_orange_soft, null))
+
+        btn.setOnClickListener {
+            selectedFolder = name
+            updateTabs()
+            loadList()
+        }
+
+        return btn
+    }
+
+    private fun updateTabs() {
+        for (i in 0 until folderTabs.childCount) {
+            val btn = folderTabs.getChildAt(i) as MaterialButton
+
+            if (btn.text == selectedFolder) {
+                btn.setBackgroundColor(resources.getColor(R.color.moa_orange, null))
+                btn.setTextColor(resources.getColor(android.R.color.white, null))
+            } else {
+                btn.setBackgroundColor(resources.getColor(R.color.moa_bg, null))
+                btn.setTextColor(resources.getColor(R.color.moa_orange_soft, null))
+            }
+        }
     }
 
     private fun loadList() {
@@ -74,13 +100,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     }
 }
 
-// 📁 폴더 목록
-fun getFolders(context: Context): List<File> {
-    val baseDir = File(context.filesDir, "MOA")
-    return baseDir.listFiles()?.filter { it.isDirectory } ?: emptyList()
+fun getFolderNames(context: Context): List<String> {
+    val prefs = context.getSharedPreferences("moa_prefs", 0)
+    return prefs.getStringSet("folder_list", setOf())?.toList() ?: emptyList()
 }
 
-// 📁 폴더 내부 파일
 fun getFilesInFolder(context: Context, folderName: String): List<SimpleRow> {
 
     val folder = File(context.filesDir, "MOA/$folderName")
@@ -98,20 +122,15 @@ fun getFilesInFolder(context: Context, folderName: String): List<SimpleRow> {
         } ?: emptyList()
 }
 
-// 📁 전체 파일
 fun getAllFiles(context: Context): List<SimpleRow> {
 
-    val folders = getFolders(context)
+    val baseDir = File(context.filesDir, "MOA")
     val prefs = context.getSharedPreferences("moa_prefs", 0)
 
-    val allFiles = mutableListOf<File>()
+    if (!baseDir.exists()) return emptyList()
 
-    folders.forEach {
-        it.listFiles()?.let { list -> allFiles.addAll(list) }
-    }
-
-    return allFiles
-        .filter { it.name.endsWith(".m4a") }
+    return baseDir.walkTopDown()
+        .filter { it.isFile && it.name.endsWith(".m4a") }
         .sortedByDescending { it.lastModified() }
         .map {
             val title = prefs.getString(it.name, it.name)
@@ -119,5 +138,5 @@ fun getAllFiles(context: Context): List<SimpleRow> {
                 .format(Date(it.lastModified()))
 
             SimpleRow(title ?: it.name, date)
-        }
+        }.toList()
 }
