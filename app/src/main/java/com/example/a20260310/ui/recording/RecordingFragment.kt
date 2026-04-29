@@ -1,6 +1,7 @@
 package com.example.a20260310.ui.recording
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
@@ -25,10 +26,23 @@ fun getCurrentFileName(): String {
     return "moa_${sdf.format(Date())}.m4a"
 }
 
+fun getOrCreateFolder(context: Context, folderName: String?): File {
+    val baseDir = File(context.filesDir, "MOA")
+    if (!baseDir.exists()) baseDir.mkdir()
+
+    val folder = File(baseDir, folderName)
+    if (!folder.exists()) folder.mkdir()
+
+    return folder
+}
+
 class RecordingFragment : Fragment(R.layout.fragment_recording) {
 
     private val viewModel: RecordingViewModel by viewModels()
     private val sessionViewModel: MeetingSessionViewModel by activityViewModels()
+
+    private var currentFile: File? = null
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -39,7 +53,7 @@ class RecordingFragment : Fragment(R.layout.fragment_recording) {
 
         ensureAudioPermission()
 
-        // ✅ 회의 제목 표시 (ViewModel)
+        // 제목 표시
         sessionViewModel.meetingDraft.observe(viewLifecycleOwner) {
             title.text = it.title
         }
@@ -49,11 +63,9 @@ class RecordingFragment : Fragment(R.layout.fragment_recording) {
             val m = (state.elapsedSeconds % 3600) / 60
             val s = state.elapsedSeconds % 60
             timer.text = String.format("%02d:%02d:%02d", h, m, s)
-            //recordBtn.text = if (state.isRecording) "STOP" else "REC"
+
             waveformView.updateAmplitude(state.amplitude, state.isRecording)
         }
-
-        var currentRecordingFile: File? = null
 
         recordBtn.setOnClickListener {
 
@@ -62,45 +74,55 @@ class RecordingFragment : Fragment(R.layout.fragment_recording) {
                 return@setOnClickListener
             }
 
-            val isRecording = viewModel.uiState.value?.isRecording == true
+            val state = viewModel.uiState.value
+            val prefs = requireContext().getSharedPreferences("moa_prefs", 0)
+            // 🔥 녹음 중 → 종료 + 이동
+            if (state?.isRecording == true) {
 
-            if (isRecording) {
-                // 🔴 녹음 종료
                 viewModel.stopRecording()
 
-                val file = currentRecordingFile
+                currentFile?.let { file ->
+                    if (file.exists() && file.length() > 0) {
 
-                if (file != null && file.exists()) {
-
-                    sessionViewModel.addSelectedFile(
-                        SelectedSourceFile(
-                            type = SelectedSourceFile.Type.AUDIO_RECORD,
-                            displayName = sessionViewModel.meetingDraft.value?.title ?: "녹음",
-                            localPath = file.absolutePath
+                        sessionViewModel.addSelectedFile(
+                            SelectedSourceFile(
+                                type = SelectedSourceFile.Type.AUDIO_RECORD,
+                                displayName = sessionViewModel.meetingDraft.value?.title ?: "녹음",
+                                localPath = file.absolutePath
+                            )
                         )
-                    )
 
-                    findNavController().navigate(
-                        R.id.action_recordingFragment_to_summarizingFragment
-                    )
-                } else {
-                    Toast.makeText(requireContext(), "녹음 파일이 없습니다", Toast.LENGTH_SHORT).show()
+                        findNavController().navigate(
+                            R.id.action_recordingFragment_to_summarizingFragment
+                        )
+
+                    } else {
+                        Toast.makeText(requireContext(), "녹음 파일 없음", Toast.LENGTH_SHORT).show()
+                    }
                 }
 
-            } else {
-                // 🟢 녹음 시작
-                val meetingName = sessionViewModel.meetingDraft.value?.title ?: "회의"
-
-                val fileName = getCurrentFileName()
-                val file = File(requireContext().filesDir, fileName)
-
-                currentRecordingFile = file  // 🔥 중요
-
-                val prefs = requireContext().getSharedPreferences("moa_prefs", 0)
-                prefs.edit().putString(fileName, meetingName).apply()
-
-                viewModel.toggleRecording(outputPath = file.absolutePath)
+                return@setOnClickListener
             }
+
+            // 🔥 녹음 시작
+            val fileName = getCurrentFileName()
+            //val file = File(requireContext().filesDir, fileName)
+                //currentFile = file
+
+            val meetingName = prefs.getString("current_meeting_name", fileName)
+            val folderName = prefs.getString("selected_folder", "전체")
+            val folder = getOrCreateFolder(requireContext(), folderName)
+            val file = File(folder, fileName)
+
+            currentFile = file
+
+            // 🔥 매핑 저장
+            prefs.edit()
+                .putString(fileName, meetingName)
+                .putString("${fileName}_folder", folderName)
+                .apply()
+
+            viewModel.toggleRecording(outputPath = file.absolutePath)
         }
     }
 

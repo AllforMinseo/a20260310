@@ -37,6 +37,11 @@ class MeetingCreateFragment : Fragment(R.layout.fragment_meeting_create) {
         timeInput.setText(currentTime)
 
         view.findViewById<MaterialButton>(R.id.nextButton).setOnClickListener {
+            val meetingName = nameInput.text.toString()
+
+            val prefs = requireContext().getSharedPreferences("moa_prefs", 0)
+            prefs.edit().putString("current_meeting_name", meetingName).apply()
+
 
             sessionViewModel.setDraft(
                 MeetingDraft(
